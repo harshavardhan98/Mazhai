@@ -1,0 +1,14 @@
+Chunking:
+https://www.codium.ai/blog/rag-for-large-scale-code-repos/
+https://docs.sweep.dev/blogs/chunking-2m-files
+
+
+Discussions:
+https://www.reddit.com/r/LocalLLaMA/comments/193e00p/how_to_chat_with_codebase/
+
+Similar Repos:
+https://medium.com/@vndee.huynh/build-your-own-rag-and-run-it-locally-langchain-ollama-streamlit-181d42805895
+https://github.com/jeffmeloy/py2dataset
+https://github.com/mpoon/gpt-repository-loader -> loads all the file in a repo and generates a text prompt
+https://github.com/curvedinf/dir-assistant -> llm for local directory, loads all file
+https://github.com/codedog-ai/codedog -> code reviewer

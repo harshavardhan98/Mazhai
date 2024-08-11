@@ -33,9 +33,10 @@ def read_and_save_file():
         with tempfile.NamedTemporaryFile(delete=False) as tf:
             tf.write(file.getbuffer())
             file_path = tf.name
+            ext = file.name.split('.')[-1]
 
         with st.session_state["ingestion_spinner"], st.spinner(f"Ingesting {file.name}"):
-            st.session_state["assistant"].ingest(file_path)
+            st.session_state["assistant"].ingest(file_path, ext)
         os.remove(file_path)
 
 
@@ -49,7 +50,7 @@ def page():
     st.subheader("Upload a document")
     st.file_uploader(
         "Upload document",
-        type=["pdf"],
+        type=["pdf", "java"],
         key="file_uploader",
         on_change=read_and_save_file,
         label_visibility="collapsed",
