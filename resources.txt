@@ -12,3 +12,6 @@ https://github.com/jeffmeloy/py2dataset
 https://github.com/mpoon/gpt-repository-loader -> loads all the file in a repo and generates a text prompt
 https://github.com/curvedinf/dir-assistant -> llm for local directory, loads all file
 https://github.com/codedog-ai/codedog -> code reviewer
+
+
+https://python.langchain.com/v0.2/docs/integrations/document_loaders/source_code/ -> loading source code

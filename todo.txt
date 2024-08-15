@@ -1,0 +1,9 @@
+
+
+TODO:
+1. Get git repo location as input
+2. Generate git diff
+3. Create a commit message/PR description
+4. Integrate with vertx api
+5. Provide option to switch between vertx API and local model
+6. Make the code work for both java and python files

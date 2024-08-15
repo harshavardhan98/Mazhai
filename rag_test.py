@@ -7,6 +7,9 @@ from langchain_text_splitters import (Language,RecursiveCharacterTextSplitter)
 from langchain.schema.runnable import RunnablePassthrough
 from langchain.prompts import PromptTemplate
 from langchain.vectorstores.utils import filter_complex_metadata
+from langchain_community.document_loaders.generic import GenericLoader
+from langchain_community.document_loaders.parsers import LanguageParser
+from pprint import pprint
 
 
 class ChatPDF:
@@ -17,7 +20,7 @@ class ChatPDF:
     def __init__(self):
         self.model = ChatOllama(model="llama3.1")
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=100)
-        self.code_splitter = RecursiveCharacterTextSplitter.from_language(Language.JAVA, chunk_size=1024, chunk_overlap=5)
+        self.code_splitter = RecursiveCharacterTextSplitter.from_language(Language.PYTHON, chunk_size=1024, chunk_overlap=5)
         self.prompt = PromptTemplate.from_template(
             """
             You are an assistant for answering questions. Use the following context to respond to the question. If you don't know the answer, simply say you don't know. Use a maximum of three sentences and be concise in your response.
@@ -28,6 +31,30 @@ class ChatPDF:
             Let me know if you need further help!
             """
         )
+
+    def ingest_folder(self, folder_path: str):
+        chunks = []
+        print("Folder path:" + str(folder_path))
+        loader = GenericLoader.from_filesystem(folder_path, glob="*", suffixes=[".py"], parser=LanguageParser())
+        docs = loader.load()
+        for document in docs:
+            pprint(document.metadata)
+
+        chunks = self.code_splitter.split_documents(docs)
+        vector_store = Chroma.from_documents(documents=chunks, embedding=FastEmbedEmbeddings())
+        self.retriever = vector_store.as_retriever(
+            search_type="similarity_score_threshold",
+            search_kwargs={
+                "k": 3,
+                "score_threshold": 0.5,
+            },
+        )
+
+        self.chain = ({"context": self.retriever, "question": RunnablePassthrough()}
+                      | self.prompt
+                      | self.model
+                      | StrOutputParser())
+
 
     def ingest(self, file_path: str, ext: str):
         chunks = []
