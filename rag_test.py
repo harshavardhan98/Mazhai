@@ -13,6 +13,10 @@ from langchain_google_vertexai import VertexAI
 from langchain_google_vertexai import VertexAIEmbeddings
 import vertexai 
 from pprint import pprint
+from langchain.vectorstores import FAISS
+import faiss
+import numpy as np
+from langchain.docstore.in_memory import InMemoryDocstore
 
 
 class ChatPDF:
@@ -49,7 +53,18 @@ class ChatPDF:
 
         chunks = self.code_splitter.split_documents(docs)
         # vector_store = Chroma.from_documents(documents=chunks, embedding=FastEmbedEmbeddings())
-        vector_store = Chroma.from_documents(documents=chunks, embedding=VertexAIEmbeddings(model_name="textembedding-gecko@003"))
+        embeddings = VertexAIEmbeddings(model_name="textembedding-gecko@003").embed_documents([chunk.page_content for chunk in chunks])
+        dimension = len(embeddings[0])
+        index = faiss.IndexFlatL2(dimension)
+        index.add(np.array(embeddings))
+        docstore = InMemoryDocstore(dict((i, chunk) for i, chunk in enumerate(chunks)))
+        index_to_docstore_id = {i: i for i in range(len(chunks))}
+
+        # vector_store = Chroma.from_documents(documents=chunks, embedding=VertexAIEmbeddings(model_name="textembedding-gecko@003"))
+        vector_store = FAISS(embedding_function=VertexAIEmbeddings(model_name="textembedding-gecko@003"),
+                                  index=index,
+                                  docstore=docstore,
+                                  index_to_docstore_id=index_to_docstore_id)
         self.retriever = vector_store.as_retriever(
             search_type="similarity_score_threshold",
             search_kwargs={
