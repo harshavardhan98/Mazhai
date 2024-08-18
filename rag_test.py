@@ -117,6 +117,11 @@ class ChatPDF:
         if not self.chain:
             return "Please, add a PDF document first."
 
+
+        results = self.retriever.get_relevant_documents(query)
+        # Print the number of retrieved documents
+        print(f"Number of retrieved documents: {len(results)}")    
+
         return self.chain.invoke(query)
 
     def clear(self):
