@@ -9,6 +9,9 @@ from langchain.prompts import PromptTemplate
 from langchain.vectorstores.utils import filter_complex_metadata
 from langchain_community.document_loaders.generic import GenericLoader
 from langchain_community.document_loaders.parsers import LanguageParser
+from langchain_google_vertexai import VertexAI
+from langchain_google_vertexai import VertexAIEmbeddings
+import vertexai 
 from pprint import pprint
 
 
@@ -19,6 +22,10 @@ class ChatPDF:
 
     def __init__(self):
         self.model = ChatOllama(model="llama3.1")
+        PROJECT_ID = "llm-test-432914"  # @param {type:"string"}
+        REGION = "us-central1"  # @param {type:"string"}
+        vertexai.init(project=PROJECT_ID, location=REGION)
+        self.model = VertexAI(model_name="gemini-1.5-flash")
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=100)
         self.code_splitter = RecursiveCharacterTextSplitter.from_language(Language.PYTHON, chunk_size=1024, chunk_overlap=5)
         self.prompt = PromptTemplate.from_template(
@@ -41,7 +48,8 @@ class ChatPDF:
             pprint(document.metadata)
 
         chunks = self.code_splitter.split_documents(docs)
-        vector_store = Chroma.from_documents(documents=chunks, embedding=FastEmbedEmbeddings())
+        # vector_store = Chroma.from_documents(documents=chunks, embedding=FastEmbedEmbeddings())
+        vector_store = Chroma.from_documents(documents=chunks, embedding=VertexAIEmbeddings(model_name="textembedding-gecko@003"))
         self.retriever = vector_store.as_retriever(
             search_type="similarity_score_threshold",
             search_kwargs={
